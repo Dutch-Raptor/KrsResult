@@ -43,8 +43,8 @@ android {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.pieterhuizenga"
-            artifactId = "result"
+            groupId = "com.github.Dutch-Raptor"
+            artifactId = "KrsResult"
             version = "0.1.0"
 
             afterEvaluate {
@@ -66,3 +66,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
