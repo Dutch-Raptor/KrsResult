@@ -40,14 +40,14 @@ android {
     }
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.github.Dutch-Raptor"
-            artifactId = "KrsResult"
-            version = "0.1.0"
+afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
+                groupId = "com.github.Dutch-Raptor"
+                artifactId = "KrsResult"
+                version = "0.1.0"
 
-            afterEvaluate {
                 from(components["release"])
             }
         }
@@ -60,10 +60,8 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.core.ktx)
 }
