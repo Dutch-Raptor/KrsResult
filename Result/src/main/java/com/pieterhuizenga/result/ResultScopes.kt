@@ -11,37 +11,31 @@ package com.pieterhuizenga.result
  *
  * ### Example:
  * ```
- * val result = useCatching {
+ * val result = catchingResultScope {
  *   val a = MResult.Ok(5).use()
  *   val b = MResult.Ok(10).use()
  *   returnOk(a + b)
  * } // result is MResult.Ok(15)
  *
- * val result = useCatching {
+ * val result = catchingResultScope {
  *   val a = MResult.Ok(5).use()
  *   val b = MResult.Err("error").use() // returns MResult.Err(CatchingScopeError.Failure("error"))
  *   returnOk(a + b) // this line is not executed
  * } // result is MResult.Err(CatchingScopeError.Failure("error"))
  *
- * val result = useCatching {
+ * val result = catchingResultScope {
  *   val a = MResult.Ok(5).use()
  *   throw Exception("error") // returns MResult.Err(CatchingScopeError.Exception(Exception("error")))
  *   returnOk(a) // this line is not executed
  * } // result is MResult.Err(CatchingScopeError.Exception(Exception("error")))
- *
+ * ```
  */
-public inline fun <T, E> catchingResultScope(block: CatchingResultScope<T, E>.() -> T): KrsResult<T, CatchingResultScopeError<E>> {
-    val scope = ResultScopeImpl<T, E>()
-    return try {
-        KrsResult.Ok(scope.block()) // Ok!
-    } catch (e: ResultScopeValueException) {
-        KrsResult.Ok(scope.bindingScopeValue!!) // Ok!
-    } catch (e: ResultScopeException) {
-        KrsResult.Err(CatchingResultScopeError.Failure(scope.bindingScopeError!!)) // Err!
+public inline fun <T, E> catchingResultScope(block: CatchingResultScope<T, E>.() -> T): KrsResult<T, CatchingResultScopeError<E>> =
+    try {
+        resultScope(block).mapErr { CatchingResultScopeError.Failure(it) }
     } catch (e: Throwable) {
         KrsResult.Err(CatchingResultScopeError.Exception(e)) // Err!
     }
-}
 
 /**
  * A typealias for [ResultScope].
@@ -70,11 +64,6 @@ public typealias CatchingResultScope<T, E> = ResultScope<T, E>
  *    returnOk(a + b)
  * } // result is MResult.Ok(15)
  * ```
- *
- *
- *
- *
- *
  *
  * @param block The block of code to execute.
  *
@@ -105,8 +94,6 @@ public typealias CatchingResultScope<T, E> = ResultScope<T, E>
  *     // manually return an error with
  *     returnErr("error")
  * }
- *
- *
  * ```
  *
  * @see [ResultScope]
@@ -123,6 +110,18 @@ public inline fun <T, E> resultScope(block: ResultScope<T, E>.() -> T): KrsResul
 }
 
 
+/**
+ * A scope that allows binding of multiple [KrsResult]s into one [KrsResult]. Within the scope the
+ * function [MResult.use][ResultScope.use] is available which either:
+ * - Produces the [KrsResult.Ok.value] if the receiving [KrsResult] was [KrsResult.Ok]
+ * - Terminates the block with the [KrsResult.Err.error] if it was [KrsResult.Err]
+ *
+ * The scope also provides two functions to return a value from the scope:
+ * - [ResultScope.returnOk] to return an [KrsResult.Ok] value from the scope
+ * - [ResultScope.returnErr] to return an [KrsResult.Err] value from the scope
+ *
+ * The scope can be used to chain multiple operations that return an [KrsResult].
+ */
 public interface ResultScope<T, E> {
     /**
      * Use the value of the result, or terminate the [ResultScope] with the error.
@@ -143,6 +142,7 @@ public interface ResultScope<T, E> {
      * ```
      */
     public fun <T> KrsResult<T, E>.use(): T
+
     /**
      * Return a value as a [KrsResult.Ok] from the [ResultScope].
      *
@@ -160,6 +160,7 @@ public interface ResultScope<T, E> {
      * ```
      */
     public fun returnOk(value: T): Nothing
+
     /**
      * Return an error as a [KrsResult.Err] from the [ResultScope].
      *

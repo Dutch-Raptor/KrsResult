@@ -1,5 +1,5 @@
 package com.pieterhuizenga
-public fun assertUnreachable() {
+fun assertUnreachable() {
     throw AssertionError("This code should be unreachable")
 }
 

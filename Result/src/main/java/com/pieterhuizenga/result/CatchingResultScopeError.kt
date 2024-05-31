@@ -6,7 +6,7 @@ import kotlin.contracts.contract
 /**
  * Represents an error created in a [CatchingResultScope].
  *
- * This can be either a failure value or an exception.
+ * This can be either a failure value [E] or an exception [Throwable].
  *
  * @param E The type of the error.
  *
