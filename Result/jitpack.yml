@@ -1,2 +1,6 @@
 jdk:
-  - openjdk22
+  - openjdk21
+before_install:
+  - sdk install java 21.0.1-sm
+  - sdk use java 21.0.1-sm
+  - sdk install gradle 8.6
